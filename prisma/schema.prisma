@@ -1,0 +1,39 @@
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+model Catgory {
+  id   String @id @default(uuid())
+  name String
+
+  Companions Companion[]
+}
+
+// String -> VARCHAR de 65.535 bytes
+// @db.Text -> TEXT de 4.294.967.295 bytes 
+model Companion {
+  id           String @id @default(uuid())
+  userId       String
+  userName     String
+  src          String
+  description  String
+  name         String @db.Text // se indica que el campo de la base de datos es de tipo TEXT
+  instructions String @db.Text
+  seed         String @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  category   Catgory @relation(fields: [categoryId], references: [id])
+  categoryId String
+
+  @@index([categoryId]) //this is to create index on categoryId, because it is a foreign key
+  @@fulltext([name]) //this is to create fulltext index on name to enable fulltext search
+}
