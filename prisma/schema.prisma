@@ -31,9 +31,34 @@ model Companion {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  category   Catgory @relation(fields: [categoryId], references: [id])
+  category   Catgory   @relation(fields: [categoryId], references: [id])
   categoryId String
+  messages   Message[]
 
   @@index([categoryId]) //this is to create index on categoryId, because it is a foreign key
   @@fulltext([name]) //this is to create fulltext index on name to enable fulltext search
+}
+
+// Role enum is defining a custom enumerated type in the database the different roles that a user can have
+// then we use it to define fields that references a user's role 
+// this ensures that only valid roles are used in the system
+// better readabale and maintainable code
+enum Role {
+  user
+  system
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  role      Role
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companionId String
+  userId      String
+
+  companion Companion @relation(fields: [companionId], references: [id], onDelete: Cascade)
+
+  @@index([companionId])
 }

@@ -2,6 +2,8 @@ import prismadb from "@/lib/prismadb";
 import { currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
+// PUT method is typically used to update an entirce source, while the patch METHOD IS USED TO UPDATE A PARTIAL RESOURCE
+// more flexible when the  cloient wants to update a resource that it has partially changed and when he has partial access
 export async function PATCH(
 	req: Request,
 	{ params }: { params: { companionId: string } }
