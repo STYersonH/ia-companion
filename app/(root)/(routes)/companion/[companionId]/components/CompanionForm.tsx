@@ -1,5 +1,6 @@
 "use client";
 
+import axios from "axios";
 import * as z from "zod"; //instalado cuando instalamos Form de shadcn
 import { Catgory, Companion } from "@prisma/client";
 import { useForm } from "react-hook-form";
@@ -26,6 +27,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Wand2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
 
 interface CompanionFormProps {
 	initialData: Companion | null;
@@ -69,7 +72,11 @@ const formSchema = z.object({
 	}),
 });
 
+// when the companion already exists, initialData will be passed to the form from the page which is calling the API to get the companion and pass it to the companionForm
 const CompanionForm = ({ initialData, categories }: CompanionFormProps) => {
+	const router = useRouter();
+	const { toast } = useToast();
+
 	// el tipo de form es el que se le pasa a useForm el cual es inferido por zod de formSchema
 	const form = useForm<z.infer<typeof formSchema>>({
 		//validates the form using zod library
@@ -88,7 +95,31 @@ const CompanionForm = ({ initialData, categories }: CompanionFormProps) => {
 	const isLoading = form.formState.isSubmitting; //indicar si el formulario a sido enviado o no
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
-		console.log(values);
+		try {
+			if (initialData) {
+				// UPDATE companion functionality
+				await axios.patch(`/api/companion/${initialData.id}`, values);
+				toast({
+					description: "Your companion was modified successfully",
+				});
+			} else {
+				// CREATE companion functionality
+				await axios.post("/api/companion", values);
+				toast({
+					description: "Your companion was created successfully",
+				});
+			}
+
+			// para refrescar todos los componentes del servidor, refreshign the data from the database ensuring
+			// to load this newest companion which we just created o edited
+			router.refresh();
+			router.push("/");
+		} catch (err) {
+			toast({
+				variant: "destructive",
+				description: "Something went wrong, please try again later",
+			});
+		}
 	};
 
 	return (
