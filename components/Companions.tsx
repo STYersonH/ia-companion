@@ -31,28 +31,30 @@ const Companions = ({ data }: CompanionsProps) => {
 			{data.map((item) => (
 				<Card
 					key={item.id}
-					className="bg-primary/10 rounded-xl justify-center text-center text-muted-foreground"
+					className="bg-primary/10 rounded-xl text-center text-muted-foreground h-full "
 				>
 					<Link href={`/chat/${item.id}`}>
-						<CardHeader className="flex justify-center items-center bg">
-							<div className="relative w-32 h-32">
-								<Image
-									src={item.src}
-									alt="companion"
-									fill
-									className=" rounded-lg"
-								/>
-							</div>
-							<p className="font-bold">{item.name}</p>
-							<p className="text-xs">{item.description}</p>
-						</CardHeader>
-						<CardFooter className="flex items-center justify-between text-xs text-muted-foreground">
-							<p className="lowercase">@{item.userName}</p>
-							<div className="flex items-center">
-								<MessageSquare className="w-3 h-3 mr-1" />
-								{item._count.messages}
-							</div>
-						</CardFooter>
+						<div className="h-full flex flex-col justify-between">
+							<CardHeader className="flex justify-center items-center bg">
+								<div className="relative w-32 h-32">
+									<Image
+										src={item.src}
+										alt="companion"
+										fill
+										className=" rounded-lg"
+									/>
+								</div>
+								<p className="font-bold">{item.name}</p>
+								<p className="text-xs">{item.description}</p>
+							</CardHeader>
+							<CardFooter className="flex items-center justify-between text-xs text-muted-foreground">
+								<p className="lowercase">@{item.userName}</p>
+								<div className="flex items-center">
+									<MessageSquare className="w-3 h-3 mr-1" />
+									{item._count.messages}
+								</div>
+							</CardFooter>
+						</div>
 					</Link>
 				</Card>
 			))}

@@ -1,5 +1,5 @@
 import prismadb from "@/lib/prismadb";
-import { currentUser } from "@clerk/nextjs";
+import { auth, currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
 // PUT method is typically used to update an entirce source, while the patch METHOD IS USED TO UPDATE A PARTIAL RESOURCE
@@ -53,6 +53,29 @@ export async function PATCH(
 		return NextResponse.json(companion);
 	} catch (error) {
 		console.log("[COMPANION_PATCH]", error);
+		return new NextResponse("Internal Server Error", { status: 500 });
+	}
+}
+
+export async function DELETE(
+	req: Request,
+	{ params }: { params: { companionId: string } }
+) {
+	try {
+		const { userId } = auth();
+
+		if (!userId) {
+			return new NextResponse("Unauthorized", { status: 401 });
+		}
+		const companion = await prismadb.companion.delete({
+			where: {
+				userId,
+				id: params.companionId,
+			},
+		});
+		return NextResponse.json(companion);
+	} catch (error) {
+		console.log("[COMPANION_DELETE]", error);
 		return new NextResponse("Internal Server Error", { status: 500 });
 	}
 }
