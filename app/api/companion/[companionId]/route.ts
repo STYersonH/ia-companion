@@ -38,7 +38,7 @@ export async function PATCH(
 
 		// TODO: Check for subscription
 		const companion = await prismadb.companion.update({
-			where: { id: params.companionId },
+			where: { id: params.companionId, userId: user.id }, //restringir tambien a userId para que no se pueda modificar el companion de otro usuario
 			data: {
 				categoryId,
 				userId: user.id,
