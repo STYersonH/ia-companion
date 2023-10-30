@@ -42,16 +42,18 @@ export class MemoryManager {
 		companionFileName: string // recibe un string con el nombre del companion
 	) {
 		// se asigna a pinecone el valor de vectorDBClient que es de tipo Pinecone
-		const pinecone = <Pinecone>this.vectorDBClient;
+		const pineconeClient = <Pinecone>this.vectorDBClient;
 
 		// se asigna a pineconeIndex el valor de la variable de entorno PINECONE_INDEX
-		const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX! || "");
+		const pineconeIndex = pineconeClient.Index(
+			process.env.PINECONE_INDEX! || ""
+		);
 
 		// usando un objeto OpenAIEmbeddings y un indice existente se crea una instancia de PineconeStore
 		// usa await para esperar a que se cree la instancia
 		const vectorStore = await PineconeStore.fromExistingIndex(
 			//El objeto OpenAIEmbeddings se crea con una clave de API de OpenAI
-			new OpenAIEmbeddings({ openAIApiKey: process.env.OPENAI_API_KEY! }),
+			new OpenAIEmbeddings({ openAIApiKey: process.env.OPENAI_API_KEY }),
 			{ pineconeIndex }
 		);
 
@@ -146,16 +148,21 @@ export class MemoryManager {
 		delimiter: string = "\n",
 		companionKey: CompanionKey
 	) {
+		// se genera una Redis key basado en el companionKey object
 		const key = this.generateRedisCompanionKey(companionKey);
 
+		// si el usuario ya tiene un historial de chat se retorna
 		if (await this.history.exists(key)) {
 			console.log("User already has chat history");
 			return;
 		}
 
+		// se separa el contenido de la semilla usando el delimitador
 		const content = seedContent.split(delimiter);
+		// se inicializa el contador en 0
 		let counter = 0;
 
+		// usando cada linea de contenido se escribe en la BD Redis usando el metodod zadd
 		for (const line of content) {
 			await this.history.zadd(key, { score: counter, member: line });
 			counter += 1;
